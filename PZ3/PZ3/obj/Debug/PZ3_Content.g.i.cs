@@ -8,6 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("geographicdata/geographic.xml")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/pz3%20-%20map.jpg")]
 
 
