@@ -105,6 +105,8 @@
   <ItemGroup>
     <Resource Include="GeographicData\Geographic.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\PZ3 - map.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

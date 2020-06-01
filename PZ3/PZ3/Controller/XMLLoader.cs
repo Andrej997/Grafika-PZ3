@@ -1,14 +1,14 @@
-﻿using PZ2.Model;
+﻿using PZ3.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using Point = PZ2.Model.Point;
+using Point = PZ3.Model.Point;
 
-using PZ2.DataContainers;
+using PZ3.DataContainers;
 using System.Windows.Shapes;
 
-namespace PZ2.Controller
+namespace PZ3.Controller
 {
     /// <summary>
     /// nasledio sam je, jer sam stavio da 

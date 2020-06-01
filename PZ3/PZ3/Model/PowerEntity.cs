@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PZ2.Model
+namespace PZ3.Model
 {
     public class PowerEntity
     {
