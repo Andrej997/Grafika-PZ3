@@ -17,7 +17,7 @@ namespace PZ3.Model
         private long thermalConstantHeat;
         private long firstEnd;
         private long secondEnd;
-        private List<Point> vertices;
+        private HashSet<Point> vertices;
 
         public LineEntity() { }
 
@@ -138,7 +138,7 @@ namespace PZ3.Model
             }
         }
 
-        public List<Point> Vertices
+        public HashSet<Point> Vertices
         {
             get
             {

@@ -20,18 +20,6 @@ namespace PZ3.Controller
         private static XmlDocument xmlDoc;
 
         /// <summary>
-        /// tacka najbliza koordinatnom pocetku
-        /// </summary>
-        private static double closestX;
-        private static double closestY;
-
-        /// <summary>
-        /// tacka najdalja koordinatnom pocetku
-        /// </summary>
-        private static double farthestX;
-        private static double farthestY;
-
-        /// <summary>
         /// Automaticly load Geographic.xml
         /// </summary>
         public static void LoadXml()
@@ -125,9 +113,8 @@ namespace PZ3.Controller
                 l.ThermalConstantHeat = long.Parse(node.SelectSingleNode("ThermalConstantHeat").InnerText);
                 l.FirstEnd = long.Parse(node.SelectSingleNode("FirstEnd").InnerText);
                 l.SecondEnd = long.Parse(node.SelectSingleNode("SecondEnd").InnerText);
-
-                lineEntities.Add(l);
-
+                l.Vertices = new HashSet<Point>();
+                
                 foreach (XmlNode pointNode in node.ChildNodes[9].ChildNodes) // 9 posto je Vertices 9. node u jednom line objektu
                 {
                     Point p = new Point();
@@ -136,79 +123,18 @@ namespace PZ3.Controller
                     p.Y = double.Parse(pointNode.SelectSingleNode("Y").InnerText);
 
                     pointsFromLines.Add(p);
+
+                    l.Vertices.Add(p);
                 }
+
+                lineEntities.Add(l);
             }
         }
         #endregion
 
-        #region Get closest and farthest point from (0,0)
-        private static void GetClosestPoint(out double closestX, out double closestY)
-        {
-            closestX = 1000;
-            closestY = 1000;
-            double latitude;
-            double longitude;
-            foreach (var item in substationEntities)
-            {
-                ToLatLon(item.X, item.Y, 34, out latitude, out longitude);
-                if (latitude < closestX)
-                    closestX = latitude;
-                if (longitude < closestY)
-                    closestY = longitude;
-            }
-            foreach (var item in nodeEntities)
-            {
-                ToLatLon(item.X, item.Y, 34, out latitude, out longitude);
-                if (latitude < closestX)
-                    closestX = latitude;
-                if (longitude < closestY)
-                    closestY = longitude;
-            }
-            foreach (var item in switchEntities)
-            {
-                ToLatLon(item.X, item.Y, 34, out latitude, out longitude);
-                if (latitude < closestX)
-                    closestX = latitude;
-                if (longitude < closestY)
-                    closestY = longitude;
-            }
-        }
-        private static void GetFarthestPoint(out double farthestX, out double farthestY)
-        {
-            farthestX = 0;
-            farthestY = 0;
-            double latitude;
-            double longitude;
-            foreach (var item in substationEntities)
-            {
-                ToLatLon(item.X, item.Y, 34, out latitude, out longitude);
-                if (latitude > farthestX)
-                    farthestX = latitude;
-                if (longitude > farthestY)
-                    farthestY = longitude;
-            }
-            foreach (var item in nodeEntities)
-            {
-                ToLatLon(item.X, item.Y, 34, out latitude, out longitude);
-                if (latitude > farthestX)
-                    farthestX = latitude;
-                if (longitude > farthestY)
-                    farthestY = longitude;
-            }
-            foreach (var item in switchEntities)
-            {
-                ToLatLon(item.X, item.Y, 34, out latitude, out longitude);
-                if (latitude > farthestX)
-                    farthestX = latitude;
-                if (longitude > farthestY)
-                    farthestY = longitude;
-            }
-        }
-        #endregion
-        
         #region Converter
-        //From UTM to Latitude and longitude in decimal
-        public static void ToLatLon(double utmX, double utmY, int zoneUTM, out double latitude, out double longitude)
+            //From UTM to Latitude and longitude in decimal
+            public static void ToLatLon(double utmX, double utmY, int zoneUTM, out double latitude, out double longitude)
         {
             bool isNorthHemisphere = true;
 
