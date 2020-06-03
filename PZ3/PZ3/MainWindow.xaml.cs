@@ -25,45 +25,39 @@ namespace PZ3
     {
         private System.Windows.Point start = new System.Windows.Point();
         private System.Windows.Point diffOffset = new System.Windows.Point();
-        private int zoomMax = 12;
+        private int zoomOutMax = 10;
         private int zoomCurent = 1;
+        private int zoomInMax = 8;
 
-        private double cubeSize = 0.006;
-        private double up = 0.012;
-        private double lineSize = 0.002;
-        private double mapSize = 1;
         public Point3DCollection Positions { get; private set; }
         public Int32Collection Indicies { get; private set; }
 
-        private List<GeometryModel3D> models = new List<GeometryModel3D>();
+        // lista svih modela
+        private HashSet<GeometryModel3D> models = new HashSet<GeometryModel3D>();
+        // model koji smo pogodili
+        private GeometryModel3D hitgeo;
 
         AxisAngleRotation3D ax3d;
 
-        
-        
         public MainWindow()
         {
             InitializeComponent();
 
-            ax3d = new AxisAngleRotation3D(new Vector3D(0, 1, 0), 0 /* inicijalno da ne bude pomerena slika*/);
-            //ax3d.Angle = -134;
+            ax3d = new AxisAngleRotation3D(new Vector3D(0, 0, 0), 0 /* inicijalno da ne bude pomerena slika*/);
             RotateTransform3D myRotateTransform = new RotateTransform3D(ax3d);
             MyModel.Transform = myRotateTransform;
 
+            #region Load all data
             Controller.XMLLoader.LoadXml();
+            #endregion
 
+            #region Draw all data on map
             DrawNodeEntity(DataContainers.Containers.GetNodes);
-
             DrawSwitchEntity(DataContainers.Containers.GetSwitches);
-
             DrawSubstationEntity(DataContainers.Containers.GetSubstations);
-
             DrawLineEntities();
+            #endregion
         }
-
-        private System.Windows.Point FindPointOnMap(double X, double Y)  => new System.Windows.Point(
-            (Y - DataContainers.Containers.DLLon) / (DataContainers.Containers.GDLon - DataContainers.Containers.DLLon) * (mapSize - cubeSize),
-            (X - DataContainers.Containers.DLLat) / (DataContainers.Containers.GDLat - DataContainers.Containers.DLLat) * (mapSize - cubeSize));
 
         #region Drawing Nodes
         private void DrawNodeEntity(HashSet<NodeEntity> powerEntities)
@@ -80,12 +74,13 @@ namespace PZ3
                 if (latitude < 45.2325 || latitude > 45.277031 || longitude < 19.793909 || longitude > 19.894459)
                     continue;
                 ToolTip toolTip = new ToolTip();
-                toolTip.Content = $"id: {item.Id}\n" +
-                                $"name: {item.Name}";
+                toolTip.Content = $"Node\n" +
+                                $"Id: {item.Id}\n" +
+                                $"Name: {item.Name}";
 
                 int connections = Controller.CheckInData.AdditionalTask8NO(item);
 
-                System.Windows.Point point = FindPointOnMap(latitude, longitude);
+                System.Windows.Point point = Controller.CheckInData.FindPointOnMap(latitude, longitude);
 
                 int lvl = Controller.CheckInData.DaLiPOstoji(point);
                 
@@ -107,13 +102,14 @@ namespace PZ3
                 if (latitude < 45.2325 || latitude > 45.277031 || longitude < 19.793909 || longitude > 19.894459)
                     continue;
                 ToolTip toolTip = new ToolTip();
-                toolTip.Content = $"id: {item.Id}\n" +
-                                $"name: {item.Name}\n" +
-                                $"status: {item.Status}";
+                toolTip.Content = $"Switch\n" +
+                                    $"Id: {item.Id}\n" +
+                                    $"Name: {item.Name}" +
+                                    $"Status: {item.Status}";
 
                 int connections = Controller.CheckInData.AdditionalTask8SW(item);
 
-                System.Windows.Point point = FindPointOnMap(latitude, longitude);
+                System.Windows.Point point = Controller.CheckInData.FindPointOnMap(latitude, longitude);
 
                 int lvl = Controller.CheckInData.DaLiPOstoji(point);
 
@@ -136,12 +132,13 @@ namespace PZ3
                     continue;
 
                 ToolTip toolTip = new ToolTip();
-                toolTip.Content = $"id: {item.Id}\n" +
-                                $"name: {item.Name}";
+                toolTip.Content = $"Substation\n" +
+                                    $"Id: {item.Id}\n" +
+                                    $"Name: {item.Name}";
 
                 int connections = Controller.CheckInData.AdditionalTask8SU(item);
 
-                System.Windows.Point point = FindPointOnMap(latitude, longitude);
+                System.Windows.Point point = Controller.CheckInData.FindPointOnMap(latitude, longitude);
 
                 int lvl = Controller.CheckInData.DaLiPOstoji(point);
 
@@ -185,25 +182,25 @@ namespace PZ3
                 Positions = new Point3DCollection()
                 {
                     new Point3D(-point.X , 0, point.Y),
-                    new Point3D(-(point.X + cubeSize), 0, point.Y),
-                    new Point3D(-point.X, 0, point.Y + cubeSize),
-                    new Point3D(-(point.X + cubeSize), 0, point.Y + cubeSize),
-                    new Point3D(-point.X, cubeSize, point.Y),
-                    new Point3D(-(point.X + cubeSize), cubeSize, point.Y),
-                    new Point3D(-(point.X ), cubeSize,  point.Y + cubeSize),
-                    new Point3D(-(point.X + cubeSize), cubeSize,  point.Y + cubeSize),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), 0, point.Y),
+                    new Point3D(-point.X, 0, point.Y + DataContainers.Containers.cubeSize),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), 0, point.Y + DataContainers.Containers.cubeSize),
+                    new Point3D(-point.X, DataContainers.Containers.cubeSize, point.Y),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), DataContainers.Containers.cubeSize, point.Y),
+                    new Point3D(-(point.X ), DataContainers.Containers.cubeSize,  point.Y + DataContainers.Containers.cubeSize),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), DataContainers.Containers.cubeSize,  point.Y + DataContainers.Containers.cubeSize),
                 };
             else if (lvl == 1)
                 Positions = new Point3DCollection()
                 {
-                    new Point3D(-point.X , up, point.Y),
-                    new Point3D(-(point.X + cubeSize), up, point.Y),
-                    new Point3D(-point.X, up, point.Y + cubeSize),
-                    new Point3D(-(point.X + cubeSize), up, point.Y + cubeSize),
-                    new Point3D(-point.X, cubeSize + up, point.Y),
-                    new Point3D(-(point.X + cubeSize), cubeSize + up, point.Y),
-                    new Point3D(-(point.X ), cubeSize + up,  point.Y + cubeSize),
-                    new Point3D(-(point.X + cubeSize), cubeSize + up,  point.Y + cubeSize),
+                    new Point3D(-point.X , DataContainers.Containers.up, point.Y),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), DataContainers.Containers.up, point.Y),
+                    new Point3D(-point.X, DataContainers.Containers.up, point.Y + DataContainers.Containers.cubeSize),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), DataContainers.Containers.up, point.Y + DataContainers.Containers.cubeSize),
+                    new Point3D(-point.X, DataContainers.Containers.cubeSize + DataContainers.Containers.up, point.Y),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), DataContainers.Containers.cubeSize + DataContainers.Containers.up, point.Y),
+                    new Point3D(-(point.X ), DataContainers.Containers.cubeSize + DataContainers.Containers.up,  point.Y + DataContainers.Containers.cubeSize),
+                    new Point3D(-(point.X + DataContainers.Containers.cubeSize), DataContainers.Containers.cubeSize + DataContainers.Containers.up,  point.Y + DataContainers.Containers.cubeSize),
                 };
 
             Indicies = new Int32Collection()
@@ -234,19 +231,20 @@ namespace PZ3
                     if (latitude < 45.2325 || latitude > 45.277031 || longitude < 19.793909 || longitude > 19.894459)
                         continue;
 
-                    System.Windows.Point point = FindPointOnMap(latitude, longitude);
+                    System.Windows.Point point = Controller.CheckInData.FindPointOnMap(latitude, longitude);
                     points.Add(point);
                 }
 
-                ToolTip tt = new System.Windows.Controls.ToolTip();
-                string str = String.Format("LINE - ID: {0}, Name: {1}, Type: {2}", line.Id, line.Name, line.LineType);
-                tt.Content = str;
+                ToolTip toolTip = new System.Windows.Controls.ToolTip();
+                toolTip.Content = $"Line\n" +
+                                    $"Id: {line.Id}\n" +
+                                    $"Name: {line.Name}";
 
-                DrawLine(points, tt);
+                DrawLine(points, toolTip, line);
             }
         }
 
-        private void DrawLine(HashSet<System.Windows.Point> points, ToolTip tt)
+        private void DrawLine(HashSet<System.Windows.Point> points, ToolTip tt, LineEntity line)
         {
             Indicies = new Int32Collection()
             {
@@ -258,19 +256,20 @@ namespace PZ3
                 Positions = new Point3DCollection()
                 {
                     new Point3D(-points.ElementAt(i).X, 0, points.ElementAt(i).Y),
-                    new Point3D(-(points.ElementAt(i).X + lineSize), 0, points.ElementAt(i).Y),
-                    new Point3D(-points.ElementAt(i).X, 0, points.ElementAt(i).Y + lineSize),
-                    new Point3D(-(points.ElementAt(i).X + lineSize), 0, points.ElementAt(i).Y + lineSize),
-                    new Point3D(-points.ElementAt(i + 1).X, lineSize, points.ElementAt(i + 1).Y),
-                    new Point3D(-(points.ElementAt(i + 1).X + lineSize), lineSize, points.ElementAt(i + 1).Y),
-                    new Point3D(-points.ElementAt(i + 1).X, lineSize, points.ElementAt(i + 1).Y + lineSize),
-                    new Point3D(-(points.ElementAt(i + 1).X + lineSize), lineSize, points.ElementAt(i + 1).Y + lineSize),
+                    new Point3D(-(points.ElementAt(i).X + DataContainers.Containers.lineSize), 0, points.ElementAt(i).Y),
+                    new Point3D(-points.ElementAt(i).X, 0, points.ElementAt(i).Y + DataContainers.Containers.lineSize),
+                    new Point3D(-(points.ElementAt(i).X + DataContainers.Containers.lineSize), 0, points.ElementAt(i).Y + DataContainers.Containers.lineSize),
+                    new Point3D(-points.ElementAt(i + 1).X, DataContainers.Containers.lineSize, points.ElementAt(i + 1).Y),
+                    new Point3D(-(points.ElementAt(i + 1).X + DataContainers.Containers.lineSize), DataContainers.Containers.lineSize, points.ElementAt(i + 1).Y),
+                    new Point3D(-points.ElementAt(i + 1).X, DataContainers.Containers.lineSize, points.ElementAt(i + 1).Y + DataContainers.Containers.lineSize),
+                    new Point3D(-(points.ElementAt(i + 1).X + DataContainers.Containers.lineSize), DataContainers.Containers.lineSize, points.ElementAt(i + 1).Y + DataContainers.Containers.lineSize),
                 };
 
                 GeometryModel3D firstObj = new GeometryModel3D();
                 firstObj.Material = new DiffuseMaterial(Brushes.Black);
                 firstObj.Geometry = new MeshGeometry3D() { Positions = Positions, TriangleIndices = Indicies };
                 firstObj.SetValue(IsToolTip, tt);
+                firstObj.SetValue(IsLine, line);
 
                 Map.Children.Add(firstObj);
                 models.Add(firstObj);
@@ -279,7 +278,17 @@ namespace PZ3
         }
         #endregion
 
+        #region ToolTip
         public static readonly DependencyProperty IsToolTip = DependencyProperty.RegisterAttached("ToolTip", typeof(ToolTip), typeof(GeometryModel3D));
+        public static void SetIsToolTip(GeometryModel3D element, ToolTip value) => element.SetValue(IsToolTip, value);
+        public static ToolTip GetIsToolTip(GeometryModel3D element) => (ToolTip)element.GetValue(IsToolTip);
+        #endregion
+
+        #region Line
+        public static readonly DependencyProperty IsLine = DependencyProperty.RegisterAttached("Line", typeof(LineEntity), typeof(GeometryModel3D));
+        public static void SetIsLine(GeometryModel3D element, LineEntity value) => element.SetValue(IsLine, value);
+        public static LineEntity GetIsLine(GeometryModel3D element) => (LineEntity)element.GetValue(IsLine);
+        #endregion
 
         #region Mouse Actions
         private void viewport1_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -287,27 +296,26 @@ namespace PZ3
             System.Windows.Point p = e.MouseDevice.GetPosition(this);
             double scaleX = 1;
             double scaleZ = 1;
-            if (e.Delta > 0 && zoomCurent < zoomMax)
+            if (e.Delta > 0 && zoomCurent < zoomOutMax)
             {
-                scaleX = skaliranje.ScaleX - 0.1;
-                scaleZ = skaliranje.ScaleZ - 0.1;
+                scaleX = skaliranje.ScaleX + 0.1;
+                scaleZ = skaliranje.ScaleZ + 0.1;
                 zoomCurent++;
                 skaliranje.ScaleX = scaleX;
                 skaliranje.ScaleZ = scaleZ;
             }
-            else if (e.Delta <= 0 && zoomCurent > -zoomMax)
+            else if (e.Delta <= 0 && zoomCurent > -zoomOutMax)
             {
-                if (zoomCurent > -5)
+                if (zoomCurent > -zoomInMax)
                 {
-                    scaleX = skaliranje.ScaleX + 0.1;
-                    scaleZ = skaliranje.ScaleZ + 0.1;
+                    scaleX = skaliranje.ScaleX - 0.1;
+                    scaleZ = skaliranje.ScaleZ - 0.1;
                     zoomCurent--;
                     skaliranje.ScaleX = scaleX;
                     skaliranje.ScaleZ = scaleZ;
                 }
             }
         }
-
         private void viewport1_MouseMove(object sender, MouseEventArgs e)
         {
             //Console.WriteLine(slider1.Value); 
@@ -358,7 +366,8 @@ namespace PZ3
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX < 0 && offsetY > 0) // 3
             {
-                //if (ax3d.Angle < 40)
+                // moze da legne (ide samo do 90 stepen)
+                if (ax3d.Angle < 90)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
                     ax3d.Angle = lastAx3d + 0.5;
@@ -367,7 +376,8 @@ namespace PZ3
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX > 0 && offsetY > 0) // 4
             {
-                //if (ax3d.Angle < 40)
+                // moze da legne (ide samo do 90 stepen)
+                if (ax3d.Angle < 90)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
                     ax3d.Angle = lastAx3d + 0.5;
@@ -394,7 +404,8 @@ namespace PZ3
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX > 0 && offsetY < 0) // 7
             {
-                //if (ax3d.Angle > -40)
+                // moze da legne "na stomak"
+                if (ax3d.Angle > -90)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
                     ax3d.Angle = lastAx3d - 0.5;
@@ -403,7 +414,8 @@ namespace PZ3
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX < 0 && offsetY < 0) // 8
             {
-                //if (ax3d.Angle > -40)
+                // moze da legne "na stomak"
+                if (ax3d.Angle > -90)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
                     ax3d.Angle = lastAx3d - 0.5;
@@ -419,21 +431,96 @@ namespace PZ3
         /// <param name="e"></param>
         private void viewport1_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.MiddleButton == MouseButtonState.Pressed)
-            {
-                viewport1.CaptureMouse();
-                start = e.GetPosition(this);
-                diffOffset.X = translacija.OffsetX;
-                diffOffset.Y = translacija.OffsetY;
-            }
+            //if (e.MiddleButton == MouseButtonState.Pressed)
+            //{
+            //    viewport1.CaptureMouse();
+            //    start = e.GetPosition(this);
+            //    diffOffset.X = translacija.OffsetX;
+            //    diffOffset.Y = translacija.OffsetY;
+            //}
 
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
+            //if (e.LeftButton == MouseButtonState.Pressed)
+            //{
                 viewport1.CaptureMouse();
                 start = e.GetPosition(this);
                 diffOffset.X = translacija.OffsetX;
                 diffOffset.Y = translacija.OffsetY;
+            //}
+
+            #region HitTest
+            System.Windows.Point mouseposition = e.GetPosition(viewport1);
+            Point3D testpoint3D = new Point3D(mouseposition.X, mouseposition.Y, 0);
+            Vector3D testdirection = new Vector3D(mouseposition.X, mouseposition.Y, 10);
+
+            PointHitTestParameters pointparams =
+                     new PointHitTestParameters(mouseposition);
+            RayHitTestParameters rayparams =
+                     new RayHitTestParameters(testpoint3D, testdirection);
+
+            //test for a result in the Viewport3D     
+            hitgeo = null;
+            VisualTreeHelper.HitTest(viewport1, null, HTResult, pointparams);
+            #endregion
+        }
+
+        private HitTestResultBehavior HTResult(System.Windows.Media.HitTestResult rawresult)
+        {
+            RayHitTestResult rayResult = rawresult as RayHitTestResult;
+            ToolTip toolTip = new ToolTip();
+            LineEntity line = new LineEntity();
+
+            if (rayResult != null)
+            {
+                bool gasit = false;
+                foreach (var model in models)
+                {
+                    if (model == rayResult.ModelHit)
+                    {
+                        hitgeo = (GeometryModel3D)rayResult.ModelHit;
+                        gasit = true;
+                        toolTip = GetIsToolTip(model);
+                        MessageBox.Show(toolTip.Content.ToString());
+
+                        line = GetIsLine(model);
+                        if (line != null)
+                        {
+                            NodeEntity node1;
+                            NodeEntity node2;
+                            for (int i = 0; i < DataContainers.Containers.GetNodes.Count; i++)
+                            {
+                                if (DataContainers.Containers.GetNodes.ElementAt(i).Id == line.FirstEnd)
+                                    node1 = DataContainers.Containers.GetNodes.ElementAt(i);
+                                if (DataContainers.Containers.GetNodes.ElementAt(i).Id == line.SecondEnd)
+                                    node2 = DataContainers.Containers.GetNodes.ElementAt(i);
+                            }
+                            SwitchEntity switch1;
+                            SwitchEntity switch2;
+                            for (int i = 0; i < DataContainers.Containers.GetSwitches.Count; i++)
+                            {
+                                if (DataContainers.Containers.GetSwitches.ElementAt(i).Id == line.FirstEnd)
+                                    switch1 = DataContainers.Containers.GetSwitches.ElementAt(i);
+                                if (DataContainers.Containers.GetSwitches.ElementAt(i).Id == line.SecondEnd)
+                                    switch2 = DataContainers.Containers.GetSwitches.ElementAt(i);
+                            }
+                            SubstationEntity substation1;
+                            SubstationEntity substation2;
+                            for (int i = 0; i < DataContainers.Containers.GetSubstations.Count; i++)
+                            {
+                                if (DataContainers.Containers.GetSubstations.ElementAt(i).Id == line.FirstEnd)
+                                    substation1 = DataContainers.Containers.GetSubstations.ElementAt(i);
+                                if (DataContainers.Containers.GetSubstations.ElementAt(i).Id == line.SecondEnd)
+                                    substation2 = DataContainers.Containers.GetSubstations.ElementAt(i);
+                            }
+                        }
+                    }
+                }
+                if (!gasit)
+                {
+                    hitgeo = null;
+                }
             }
+            
+            return HitTestResultBehavior.Stop;
         }
 
         /// <summary>
@@ -443,14 +530,14 @@ namespace PZ3
         /// <param name="e"></param>
         private void viewport1_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.MiddleButton == MouseButtonState.Released)
-            {
+            //if (e.MiddleButton == MouseButtonState.Released)
+            //{
+            //    viewport1.ReleaseMouseCapture();
+            //}
+            //if (e.LeftButton == MouseButtonState.Released)
+            //{
                 viewport1.ReleaseMouseCapture();
-            }
-            if (e.LeftButton == MouseButtonState.Released)
-            {
-                viewport1.ReleaseMouseCapture();
-            }
+            //}
         }
         #endregion
     }

@@ -5,6 +5,7 @@ namespace PZ3.DataContainers
 {
     public class Containers
     {
+        #region Constant params
         /// <summary>
         /// Donji levi ugao latitude (min X)
         /// </summary>
@@ -13,7 +14,6 @@ namespace PZ3.DataContainers
         /// Donji levi ugao longlitude (max X)
         /// </summary>
         public static double DLLon { get => 19.793909; }
-
         /// <summary>
         /// Gornji desni ugao latitude (min Z)
         /// </summary>
@@ -22,6 +22,23 @@ namespace PZ3.DataContainers
         /// Gornji desni ugao longlitude (max Z)
         /// </summary>
         public static double GDLon { get => 19.894459; }
+        /// <summary>
+        /// Map size
+        /// </summary>
+        public static double mapSize { get => 1; }
+        /// <summary>
+        /// Line size
+        /// </summary>
+        public static double lineSize { get => 0.002; }
+        /// <summary>
+        /// Cube size
+        /// </summary>
+        public static double cubeSize { get => 0.006; }
+        /// <summary>
+        /// Podigni kocku
+        /// </summary>
+        public static double up { get => 0.012; }
+        #endregion
 
         protected static HashSet<SubstationEntity> substationEntities = new HashSet<SubstationEntity>(); // 67
         public static HashSet<SubstationEntity> GetSubstations => substationEntities;

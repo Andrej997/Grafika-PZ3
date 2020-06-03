@@ -12,9 +12,7 @@
                     MouseMove="viewport1_MouseMove" MouseDown="viewport1_MouseDown"
                     MouseUp="viewport1_MouseUp">
             <Viewport3D.Camera>
-                <!--<PerspectiveCamera x:Name="camera" Position="0,5,0.1" LookDirection="0,-100,-0.9">-->
-                <PerspectiveCamera Position = "-0.4,3,0.2" LookDirection = "0,-70,6"
-               >
+                <PerspectiveCamera Position = "-0.5,3,0.2" LookDirection = "0,-70,6">
                     <PerspectiveCamera.Transform>
                         <Transform3DGroup>
                             <RotateTransform3D>
@@ -51,16 +49,10 @@
                                     </DiffuseMaterial>
                                 </GeometryModel3D.Material>
                                 <GeometryModel3D.Geometry>
-                                    <MeshGeometry3D  Positions="  0,0,0 -1,0,0 -1,0,1 0,0,1"
+                                    <MeshGeometry3D  Positions="0,0,0 -1,0,0 -1,0,1 0,0,1"
                                         TextureCoordinates="0,1 1,1 1,0 0,0"
                                         TriangleIndices="0 1 2 0 2 3"/>
                                 </GeometryModel3D.Geometry>
-                                <!--<GeometryModel3D.Transform>
-                                    <Transform3DGroup>
-                                        <TranslateTransform3D x:Name="translacija" OffsetX="0" OffsetY="0" OffsetZ="0"/>
-                                        <ScaleTransform3D x:Name="skaliranje" ScaleX="1" ScaleY="1" ScaleZ="1"/>
-                                    </Transform3DGroup>
-                                </GeometryModel3D.Transform>-->
                             </GeometryModel3D>
                         </Model3DGroup>
                     </ModelVisual3D.Content>

@@ -67,5 +67,13 @@ namespace PZ3.Controller
             return 0;
         }
         #endregion
+
+        #region Find location on map
+        public static System.Windows.Point FindPointOnMap(double X, double Y) => new System.Windows.Point(
+                (Y - DataContainers.Containers.DLLon) / (DataContainers.Containers.GDLon - DataContainers.Containers.DLLon) * (DataContainers.Containers.mapSize - DataContainers.Containers.cubeSize),
+                (X - DataContainers.Containers.DLLat) / (DataContainers.Containers.GDLat - DataContainers.Containers.DLLat) * (DataContainers.Containers.mapSize - DataContainers.Containers.cubeSize)
+            );
+
+        #endregion
     }
 }
