@@ -25,6 +25,7 @@ namespace PZ3
     {
         private System.Windows.Point start = new System.Windows.Point();
         private System.Windows.Point diffOffset = new System.Windows.Point();
+
         private int zoomOutMax = 10;
         private int zoomCurent = 1;
         private int zoomInMax = 8;
@@ -104,7 +105,7 @@ namespace PZ3
                 ToolTip toolTip = new ToolTip();
                 toolTip.Content = $"Switch\n" +
                                     $"Id: {item.Id}\n" +
-                                    $"Name: {item.Name}" +
+                                    $"Name: {item.Name}\n" +
                                     $"Status: {item.Status}";
 
                 int connections = Controller.CheckInData.AdditionalTask8SW(item);
@@ -342,7 +343,6 @@ namespace PZ3
                 }
             }
         }
-        private double lastAx3d = 0;
         private void SetAx3d(double offsetX, double offsetY)
         {
             Console.WriteLine("ax3d.Angle = " + ax3d.Angle);
@@ -351,8 +351,7 @@ namespace PZ3
                 //if (ax3d.Angle > -60)
                 {
                     ax3d.Axis = new Vector3D(0, 1, 0);
-                    ax3d.Angle = lastAx3d - 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle + 0.5;
                 }
             }
             if (Math.Abs(offsetX) > Math.Abs(offsetY) && offsetX < 0 && offsetY > 0) // 2
@@ -360,8 +359,7 @@ namespace PZ3
                 //if (ax3d.Angle > -60)
                 {
                     ax3d.Axis = new Vector3D(0, 1, 0);
-                    ax3d.Angle = lastAx3d - 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle + 0.5;
                 }
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX < 0 && offsetY > 0) // 3
@@ -370,8 +368,7 @@ namespace PZ3
                 if (ax3d.Angle < 90)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
-                    ax3d.Angle = lastAx3d + 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle + 0.5;
                 }
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX > 0 && offsetY > 0) // 4
@@ -380,8 +377,7 @@ namespace PZ3
                 if (ax3d.Angle < 90)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
-                    ax3d.Angle = lastAx3d + 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle + 0.5;
                 }
             }
             if (Math.Abs(offsetX) > Math.Abs(offsetY) && offsetX > 0 && offsetY > 0) // 5
@@ -389,8 +385,7 @@ namespace PZ3
                 //if (ax3d.Angle < 60)
                 {
                     ax3d.Axis = new Vector3D(0, 1, 0);
-                    ax3d.Angle = lastAx3d + 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle - 0.5;
                 }
             }
             if (Math.Abs(offsetX) > Math.Abs(offsetY) && offsetX > 0 && offsetY < 0) // 6
@@ -398,28 +393,23 @@ namespace PZ3
                 //if (ax3d.Angle < 60)
                 {
                     ax3d.Axis = new Vector3D(0, 1, 0);
-                    ax3d.Angle = lastAx3d + 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle - 0.5;
                 }
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX > 0 && offsetY < 0) // 7
             {
-                // moze da legne "na stomak"
-                if (ax3d.Angle > -90)
+                if (ax3d.Angle >= 0)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
-                    ax3d.Angle = lastAx3d - 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle - 0.5;
                 }
             }
             if (Math.Abs(offsetX) < Math.Abs(offsetY) && offsetX < 0 && offsetY < 0) // 8
             {
-                // moze da legne "na stomak"
-                if (ax3d.Angle > -90)
+                if (ax3d.Angle >= 0)
                 {
                     ax3d.Axis = new Vector3D(1, 0, 0);
-                    ax3d.Angle = lastAx3d - 0.5;
-                    lastAx3d = ax3d.Angle;
+                    ax3d.Angle = ax3d.Angle - 0.5;
                 }
             }
         }
@@ -448,18 +438,21 @@ namespace PZ3
             //}
 
             #region HitTest
-            System.Windows.Point mouseposition = e.GetPosition(viewport1);
-            Point3D testpoint3D = new Point3D(mouseposition.X, mouseposition.Y, 0);
-            Vector3D testdirection = new Vector3D(mouseposition.X, mouseposition.Y, 10);
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                System.Windows.Point mouseposition = e.GetPosition(viewport1);
+                Point3D testpoint3D = new Point3D(mouseposition.X, mouseposition.Y, 0);
+                Vector3D testdirection = new Vector3D(mouseposition.X, mouseposition.Y, 10);
 
-            PointHitTestParameters pointparams =
-                     new PointHitTestParameters(mouseposition);
-            RayHitTestParameters rayparams =
-                     new RayHitTestParameters(testpoint3D, testdirection);
+                PointHitTestParameters pointparams =
+                         new PointHitTestParameters(mouseposition);
+                RayHitTestParameters rayparams =
+                         new RayHitTestParameters(testpoint3D, testdirection);
 
-            //test for a result in the Viewport3D     
-            hitgeo = null;
-            VisualTreeHelper.HitTest(viewport1, null, HTResult, pointparams);
+                //test for a result in the Viewport3D     
+                hitgeo = null;
+                VisualTreeHelper.HitTest(viewport1, null, HTResult, pointparams);
+            }
             #endregion
         }
 
@@ -511,6 +504,8 @@ namespace PZ3
                                 if (DataContainers.Containers.GetSubstations.ElementAt(i).Id == line.SecondEnd)
                                     substation2 = DataContainers.Containers.GetSubstations.ElementAt(i);
                             }
+
+                            // pronadjeni su povezani tipovi
                         }
                     }
                 }

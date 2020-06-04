@@ -11,8 +11,9 @@
         <Viewport3D Name="viewport1" MouseWheel="viewport1_MouseWheel" 
                     MouseMove="viewport1_MouseMove" MouseDown="viewport1_MouseDown"
                     MouseUp="viewport1_MouseUp">
+            
             <Viewport3D.Camera>
-                <PerspectiveCamera Position = "-0.5,3,0.2" LookDirection = "0,-70,6">
+                <PerspectiveCamera x:Name="camera" Position = "-0.5,3,0.2" LookDirection = "0,-70,6">
                     <PerspectiveCamera.Transform>
                         <Transform3DGroup>
                             <RotateTransform3D>
@@ -23,11 +24,8 @@
                             <TranslateTransform3D x:Name="translacija" OffsetX="0" OffsetY="0" OffsetZ="0"/>
                             <ScaleTransform3D x:Name="skaliranje" ScaleX="1" ScaleY="1" ScaleZ="1"/>
                         </Transform3DGroup>
-                        
-
                     </PerspectiveCamera.Transform>
                 </PerspectiveCamera>
-                
             </Viewport3D.Camera>
 
             <Viewport3D.Children>
@@ -56,8 +54,8 @@
                             </GeometryModel3D>
                         </Model3DGroup>
                     </ModelVisual3D.Content>
-
                 </ModelVisual3D>
+                
             </Viewport3D.Children>
         </Viewport3D>
     </Grid>
